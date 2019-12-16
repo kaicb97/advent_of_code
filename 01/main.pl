@@ -19,9 +19,38 @@ while (my $row = <$fh>) {
 	chomp $row;
 
 	
+	my $fuel_for_module = formula($row);
+	my $fuel_for_fuel = fuel_for_fuel($fuel_for_module);
 
-	$fuel += POSIX::floor($row / 3) -2;
+	$fuel += $fuel_for_module + $fuel_for_fuel;
 
 }
 
 print ("Fuel required: " . $fuel . "\n");
+
+
+
+
+
+#computes the fuel required for extra fuel
+sub fuel_for_fuel {
+	my ($new, $total) = @_;
+
+	my $fuel_for_new = formula($new);
+
+	if(!($fuel_for_new > 0)) {
+		return $total;
+	}
+	else {
+		return $fuel_for_new + fuel_for_fuel($fuel_for_new);
+	}
+}
+
+
+
+#computes the fuel required for a given mass excluding the fuel for extra fuel-mass
+sub formula {
+	my ($mass) = @_;
+
+	return POSIX::floor($mass / 3) -2;
+}
