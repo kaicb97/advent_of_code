@@ -34,12 +34,12 @@ print ("Fuel required: " . $fuel . "\n");
 
 #computes the fuel required for extra fuel
 sub fuel_for_fuel {
-	my ($new, $total) = @_;
+	my ($new) = @_;
 
 	my $fuel_for_new = formula($new);
 
-	if(!($fuel_for_new > 0)) {
-		return $total;
+	if($fuel_for_new <= 0) {
+		return 0;
 	}
 	else {
 		return $fuel_for_new + fuel_for_fuel($fuel_for_new);
