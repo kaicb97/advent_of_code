@@ -11,7 +11,7 @@ sub new {
 }
 
 sub run {
-    my ( $self, $file_loader ) = @_;
+    my ( $self, $input_noun, $input_verb, $file_loader ) = @_;
 
     my $puzzle = $file_loader->load_file;
 
@@ -19,8 +19,8 @@ sub run {
 
     $self->{intlist} = \@intlist;
 
-${$self->{intlist}}[1] = 12;
-${$self->{intlist}}[2] = 2;
+    ${ $self->{intlist} }[1] = $input_noun;
+    ${ $self->{intlist} }[2] = $input_verb;
 
     my $index = 0;
     while ( scalar( @intlist ) > $index ) {
@@ -32,15 +32,18 @@ ${$self->{intlist}}[2] = 2;
             my $value_2 = $intlist[ $index + 2 ];
             my $result  = $intlist[ $index + 3 ];
 
-            $self->$operation( $value_1, $value_2, $result );
+            $intlist[$result] = $self->$operation( $intlist[$value_1], $intlist[$value_2] );
         }
         else {
             die "Unbekannter opcode!";
         }
 
+	last if($operation eq "halt");
+
         $index += 4;
     }
 
+	return $intlist[0];
 }
 
 sub opcode {
@@ -60,32 +63,18 @@ sub opcode {
 }
 
 sub add {
-    my ( $self, $value_1, $value_2, $result ) = @_;
-
-    my $sum_1 = ${ $self->{intlist} }[$value_1];
-    print "erster summand: " . $sum_1 . "\n";
-    my $sum_2 = ${ $self->{intlist} }[$value_2];
-    print "zweiter summand: " . $sum_2 . "\n";
-
-    ${ $self->{intlist} }[$result] = $sum_1 + $sum_2;
-    print "$value_1($sum_1) + $value_2($sum_2) => ($result)${$self->{intlist}}[$result]\n";
+    my ( $self, $sum_1, $sum_2 ) = @_;
+    return $sum_1 + $sum_2;
 }
 
 sub mult {
-    my ( $self, $value_1, $value_2, $result ) = @_;
-
-    my $sum_1 = ${ $self->{intlist} }[$value_1];
-    print "erster summand: " . $sum_1 . "\n";
-    my $sum_2 = ${ $self->{intlist} }[$value_2];
-    print "zweiter summand: " . $sum_2 . "\n";
-
-    my $sum = ${ $self->{intlist} }[$result] = $sum_1 * $sum_2;
-    print "$value_1($sum_1) * $value_2($sum_2) => ($result)${$self->{intlist}}[$result]\n";
+    my ( $self, $sum_1, $sum_2 ) = @_;
+    return $sum_1 * $sum_2;
 }
 
 sub halt {
     my ( $self ) = @_;
-    print "\n\nintlist an Stelle 0: " . ${ $self->{intlist} }[0] . "\n\n";
-    exit;
+    #print "\n\nintlist an Stelle 0: " . ${ $self->{intlist} }[0] . "\n\n";
+    #exit;
 }
 1;
