@@ -20,15 +20,18 @@ sub init {
 
     my @wire;
 
-    my @steps = split ", ", $path;
+    my @steps = split ",", $path;
 
     for my $step ( @steps ) {
+
+
+	    #print("\nStart: (" . $tmp_x . ", " . $tmp_y . ") \nAnweisung: " . $step . "\n");
+
         my $direction = substr $step, 0, 1;
         my $length = int( substr $step, 1, length( $step ) - 1 );
 
         #move up
         if ( $direction eq "U" ) {
-
 
             while ( $length > 0 ) {
 
@@ -41,20 +44,46 @@ sub init {
             }
 
         }
-	elsif ( $direction ){
-		
+        elsif ( $direction eq "D" ) {
+            while ( $length > 0 ) {
+
+                my $p = Point->new;
+                $p->set_point( $tmp_x, $tmp_y );
+                push @wire, $p;
+
+                $tmp_y--;
+                $length--;
+            }
+
+        }
+	elsif($direction eq "R") {
+            while ( $length > 0 ) {
+
+                my $p = Point->new;
+                $p->set_point( $tmp_x, $tmp_y );
+                push @wire, $p;
+
+                $tmp_x++;
+                $length--;
+            }
+	
+	}
+	elsif($direction eq "L") {
+            while ( $length > 0 ) {
+
+                my $p = Point->new;
+                $p->set_point( $tmp_x, $tmp_y );
+                push @wire, $p;
+
+                $tmp_x--;
+                $length--;
+            }
+	
 	}
     }
 
     $self->{wire} = \@wire;
 }
-
-
-
-
-
-
-
 
 sub print_wire {
     my ( $self ) = @_;
@@ -62,9 +91,8 @@ sub print_wire {
     for my $p ( @{ $self->{wire} } ) {
         $p->print_point;
 
-	#print @{$p}[0]->{y};
 
-}
+    }
 }
 
 1;

@@ -1,3 +1,4 @@
+
 package DayThree;
 
 use strict;
@@ -13,186 +14,138 @@ sub new {
 }
 
 sub run {
-    my ( $self, $file_loader, $offset ) = @_;
+    my ( $self, $file_loader ) = @_;
 
     my $puzzle = $file_loader->load_file;
 
-    $self->{shortest_distance} = 0;
+    $self->{shortest_distance} = undef;
 
     my @path = split /\n/, $puzzle;
 
+    $self->init_a( $path[0] );
+    $self->find_shortest( $path[1] );
 
-    my $wire_a = Wire->new;
-    $wire_a->init($path[0]);
-    $wire_a->print_wire;
 }
 
+#creates two hashes. the first hash has the x-values as keys and holds all interverals one which the wire is, the second one holds the y-value with intervals on the x-axis
+sub init_a {
+    my ( $self, $path ) = @_;
 
+    my $tmp_x = 0;
+    my $tmp_y = 0;
 
+    my %intervals_x;
+    my %intervals_y;
 
+    my @moves = split ", ", $path;
 
+    for my $move ( @moves ) {
 
+        #intervals for static x
+        if ( substr( $move, 0, 1 ) eq "U" ) {
+            print $move . "\n";
+            my $start = $tmp_y;
+            my $end = $tmp_y + int( substr( $move, 1, length( $move ) - 1 ) );
+            $tmp_y = $end;
 
+            if ( $intervals_x{$tmp_x} ) {
+                push @{ $intervals_x{$tmp_x} }, "[$start, $end]";
+            }
+            else {
+                $intervals_x{$tmp_x} = ["[$start, $end]"];
+            }
 
+        }
 
+        elsif ( substr( $move, 0, 1 ) eq "D" ) {
+            print $move . "\n";
+            my $start = $tmp_y;
+            my $end = $tmp_y - int( substr( $move, 1, length( $move ) - 1 ) );
+            $tmp_y = $end;
 
+            if ( $intervals_x{$tmp_x} ) {
+                push @{ $intervals_x{$tmp_x} }, "[$start, $end]";
+            }
+            else {
+                $intervals_x{$tmp_x} = ["[$start, $end]"];
+            }
 
+        }
 
+        #intervals for static y
+        elsif ( substr( $move, 0, 1 ) eq "L" ) {
+            print $move . "\n";
+            my $start = $tmp_x;
+            my $end = $tmp_x - int( substr( $move, 1, length( $move ) - 1 ) );
+            $tmp_x = $end;
 
+            if ( $intervals_y{$tmp_y} ) {
+                push @{ $intervals_y{$tmp_y} }, "[$start, $end]";
+            }
+            else {
+                $intervals_y{$tmp_y} = ["[$start, $end]"];
+            }
 
+        }
 
+        elsif ( substr( $move, 0, 1 ) eq "R" ) {
+            print $move . "\n";
+            my $start = $tmp_x;
+            my $end = $tmp_x + int( substr( $move, 1, length( $move ) - 1 ) );
+            $tmp_x = $end;
 
+            if ( $intervals_y{$tmp_y} ) {
+                push @{ $intervals_y{$tmp_y} }, "[$start, $end]";
+            }
+            else {
+                $intervals_y{$tmp_y} = ["[$start, $end]"];
+            }
 
+        }
 
+    }
 
+    $self->{wire_a} = [ %intervals_x, %intervals_y ];
 
+    use Data::Dumper;
 
+    #print Dumper %intervals_x;
+    print "\n---------------------\n";
 
+    #print Dumper %intervals_y;
+}
 
+sub find_shortest {
+    my ( $self, $path ) = @_;
 
+    my $tmp_x = 0;
+    my $tmp_y = 0;
 
+    my @moves = split ", ", $path;
 
+    for my $move ( @moves ) {
 
+        if ( substr( $move, 0, 1 ) eq "U" ) {
 
+            my $length = int( substr( $move, 1, length( $move ) - 1 ) );
 
+            while ( $length > 0 ) {
+                $tmp_y++;
+                $self->is_intersection( $tmp_x, $tmp_y );
+                $length--;
+            }
 
+        }
+        elsif ( substr( $move, 0, 1 ) eq "D" ) {
+            print "";
+        }    #...
+    }
 
+}
 
-
-
-
-
-
-
-
-
-
-#sub write_array {
-#    my ( $self, $path ) = @_;
-#
-#    print $path . "\n\n";
-#
-#    my $pos_x = 25;
-#    my $pos_y = 25;
-#
-#    my @matrix;
-#    $self->{matrix} = \@matrix;
-#
-#    my @steps = split ", ", $path;
-#
-#    for my $step ( @steps ) {
-#
-#        my $direction = substr $step, 0, 1;
-#        my $length = int( substr $step, 1, length( $step ) - 1 );
-#
-#        if ( $direction eq "R" ) {
-#            $self->move_right( $pos_x, $pos_y, $length );
-#            $pos_x += $length;
-#            print "Rechts mit $step, neue Position: ($pos_x, $pos_y) \n";
-#        }
-#        elsif ( $direction eq "L" ) {
-#            $self->move_left( $pos_x, $pos_y, $length );
-#            $pos_x -= $length;
-#            print "Links mit $step, neue Position: ($pos_x, $pos_y) \n";
-#        }
-#        elsif ( $direction eq "U" ) {
-#            $self->move_up( $pos_x, $pos_y, $length );
-#            $pos_y += $length;
-#            print "Hoch mit $step, neue Position: ($pos_x, $pos_y) \n";
-#        }
-#        elsif ( $direction eq "D" ) {
-#            $self->move_down( $pos_x, $pos_y, $length );
-#            $pos_y -= $length;
-#            print "Runter mit $step, neue Position: ($pos_x, $pos_y) \n";
-#        }
-#
-#    }
-#
-#    use Data::Dumper;
-#    print Dumper $self->{matrix};
-#    $self->print_wire;
-#}
-#
-##position - point before instruction, instruction number of steps to go
-#sub move_up {
-#    my ( $self, $pos_x, $pos_y, $steps ) = @_;
-#
-#    while ( $steps > 0 ) {
-#
-#        my $tmp_y = int( $pos_y + $steps );
-#
-#        $self->{matrix}[$pos_x][$tmp_y] = 1;
-#        $steps--;
-#    }
-#}
-#
-#sub move_down {
-#    my ( $self, $pos_x, $pos_y, $steps ) = @_;
-#
-#    while ( $steps > 0 ) {
-#
-#        my $tmp_y = int( $pos_y - $steps );
-#
-#        $self->{matrix}[$pos_x][$tmp_y] = 1;
-#        $steps--;
-#    }
-#}
-#
-#sub move_left {
-#    my ( $self, $pos_x, $pos_y, $steps ) = @_;
-#
-#    while ( $steps > 0 ) {
-#
-#        my $tmp_x = int( $pos_x - $steps );
-#
-#        $self->{matrix}[$tmp_x][$pos_y] = 1;
-#        $steps--;
-#    }
-#}
-#
-#sub move_right {
-#    my ( $self, $pos_x, $pos_y, $steps ) = @_;
-#
-#    while ( $steps > 0 ) {
-#
-#        my $tmp_x = int( $pos_x + $steps );
-#
-#        $self->{matrix}[$tmp_x][$pos_y] = 1;
-#        $steps--;
-#    }
-#}
-#
-#sub print_wire {
-#    print "\n print wire: \n\n";
-#    my ( $self ) = @_;
-#
-#    my $offset = $self->{offset};
-#
-#    my $pos_x = 0;
-#    my $pos_y = 0;
-#
-#    for my $val_x ( $self->{matrix} ) {
-#        my @x = @{$val_x};
-#        use Data::Dumper @{$val_x};
-#        for my $val_y ( @x ) {
-#            print "(" . $pos_x . ", " . $pos_y . ")\n";
-#            $pos_y++;
-#        }
-#        print "\n";
-#
-#        $pos_x++;
-#    }
-#
-#}
-#
-##sub compute_distance {
-##	my ($self, $position) = @_;
-##
-##	my $distance = $pos_x-$pos_y;
-##
-##	if($distance < $self->{shortest_distance}) {
-##		$self->shortest_distance = $distance;
-##	}
-##}
+#check if point is in an interval of wire a
+sub is_intersection {
+    my ( $self, $x, $y ) = @_;
+}
 
 1;
